@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daryn Cup — Фильм мен ән квизі</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0E1A5B;--navy2:#1B2D8F;--yellow:#FFD23F;--coral:#FF5A4E;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--navy);color:var(--white);font-family:'Montserrat',sans-serif;padding:24px 16px 40px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font-family:'Unbounded',sans-serif;font-weight:900;font-size:clamp(30px,6vw,56px);margin:0;line-height:1}
+h1 span{color:var(--yellow)}
+.badge{align-self:flex-start;background:var(--yellow);color:var(--navy);font-weight:800;letter-spacing:2px;font-size:13px;padding:8px 14px;border-radius:999px}
+.badge.audio{background:var(--coral)}
+.title{font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(22px,4.5vw,36px);margin:0}
+.text{font-weight:700;font-size:clamp(15px,2.6vw,20px);line-height:1.5;margin:0}
+.stage{background:var(--navy2);border:3px solid var(--yellow);border-radius:18px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative}
+.stage video,.stage iframe{width:100%;height:100%;border:0;background:#000}
+.stage.audio{aspect-ratio:auto;min-height:200px;flex-direction:column;gap:16px;padding:24px}
+.stage audio{width:100%;max-width:560px}
+.note{font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(20px,4vw,30px);color:var(--yellow);text-align:center}
+.bars{display:flex;gap:6px;align-items:flex-end;height:56px}
+.bars i{display:block;width:10px;background:var(--coral);border-radius:4px;animation:eq 1s ease-in-out infinite}
+.bars i:nth-child(1){height:30%;animation-delay:0s}.bars i:nth-child(2){height:80%;animation-delay:.2s}.bars i:nth-child(3){height:50%;animation-delay:.4s}.bars i:nth-child(4){height:100%;animation-delay:.1s}.bars i:nth-child(5){height:60%;animation-delay:.3s}
+@keyframes eq{50%{transform:scaleY(.4)}}
+@media (prefers-reduced-motion:reduce){.bars i{animation:none}}
+.nav{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.btn{border:0;border-radius:999px;padding:14px 26px;font:800 16px 'Montserrat',sans-serif;cursor:pointer;background:var(--yellow);color:var(--navy)}
+.btn.coral{background:var(--coral)}
+.btn.ghost{background:transparent;color:var(--white);border:2px solid var(--white)}
+.btn:hover,.btn:focus-visible{outline:3px solid var(--white)}
+.btn[disabled]{opacity:.35;cursor:default;outline:none}
+.dots{display:flex;gap:8px;flex-wrap:wrap}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--navy2);border:2px solid var(--yellow)}
+.dot.on{background:var(--yellow)}
+.dot.a{border-color:var(--coral)}.dot.a.on{background:var(--coral)}
+.answers{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:14px;align-items:center;background:var(--white);color:var(--navy);border-radius:16px;padding:14px 18px}
+.row .n{font-family:'Unbounded',sans-serif;font-weight:900;font-size:22px;min-width:38px}
+.row .k{font-weight:800;font-size:12px;letter-spacing:2px;background:var(--yellow);border-radius:999px;padding:5px 10px}
+.row .k.audio{background:var(--coral)}
+.row .a{font-weight:800;font-size:clamp(16px,2.8vw,22px)}
+.reveal{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.ans{width:100%;background:var(--white);color:var(--navy);border-radius:16px;padding:18px 22px;font-family:'Unbounded',sans-serif;font-weight:700;font-size:clamp(18px,3.4vw,28px);line-height:1.3}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ============ СҰРАҚТАР МЕН ЖАУАПТАР ============
+   Әр клип үшін екі нұсқа бар:
+   1) Файл:    src:"video/1.mp4"  (немесе "audio/1.mp3") — файлдарды осы HTML-мен бір папкаға салыңыз
+   2) YouTube: yt:"VIDEO_ID", start:30, end:50  (басталу және аяқталу секунды)
+   answer — жауап, соңында көрсетіледі */
+const VIDEOS = [
+  {src:"video/1.mp4", answer:"Қазақ хандығы: Алмас қылыш"},
+  {src:"video/2.mp4", answer:"Чарли и шоколадная фабрика"},
+  {src:"video/3.mp4", answer:"Джуманджи"},
+  {src:"video/4.mp4", answer:"Тракторшының махаббаты"},
+  {src:"video/5.mp4", answer:"Дом странных детей Мисс Перегрин"}
+];
+const AUDIOS = [
+  {src:"audio/1.mp3", answer:"Қайрат Нұртас — Нәзік гүлім"},
+  {src:"audio/2.mp3", answer:"Заттыбек Көпбосынұлы — Ақмаржан"},
+  {src:"audio/3.mp3", answer:"Әбдіжаппар Әлқожа — Махаббатсыз өмірді кім сүрмек"},
+  {src:"audio/4.mp3", answer:"Dua Lipa — Training Season"},
+  {src:"audio/5.mp3", answer:"Мұрат Әбділдә — Шағала"}
+];
+/* ================================================ */
+
+const STEPS = [{t:"intro"}]
+  .concat(VIDEOS.map((v,i)=>({t:"video",i,item:v})))
+  .concat(AUDIOS.map((v,i)=>({t:"audio",i,item:v})))
+  .concat([{t:"outro"}]);
+let pos = 0;
+const app = document.getElementById("app");
+
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text != null) e.textContent = text;
+  return e;
+}
+function ytUrl(it){
+  let u = "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(it.yt) + "?rel=0&modestbranding=1&playsinline=1";
+  if(it.start) u += "&start=" + Number(it.start);
+  if(it.end) u += "&end=" + Number(it.end);
+  return u;
+}
+function media(step){
+  const it = step.item;
+  const isAudio = step.t === "audio";
+  const stage = el("div", "stage" + (isAudio ? " audio" : ""));
+  if(isAudio){
+    const bars = el("div","bars"); bars.setAttribute("aria-hidden","true");
+    for(let k=0;k<5;k++) bars.appendChild(el("i"));
+    stage.appendChild(bars);
+    stage.appendChild(el("div","note","Тыңда және ата!"));
+    if(it.yt){
+      // YouTube-тың аудиосы: плеер көрінбей, бірақ басқару батырмасы бар
+      const f = el("iframe"); f.src = ytUrl(it); f.title = "Аудио";
+      f.allow = "autoplay; encrypted-media"; f.style.cssText = "width:100%;max-width:560px;height:60px";
+      stage.appendChild(f);
+    } else {
+      const a = el("audio"); a.controls = true; a.preload = "auto"; a.src = it.src;
+      stage.appendChild(a);
+    }
+  } else if(it.yt){
+    const f = el("iframe"); f.src = ytUrl(it); f.title = "Видео үзінді";
+    f.allow = "autoplay; encrypted-media; picture-in-picture"; f.allowFullscreen = true;
+    stage.appendChild(f);
+  } else {
+    const v = el("video"); v.controls = true; v.preload = "auto"; v.playsInline = true; v.src = it.src;
+    stage.appendChild(v);
+  }
+  return stage;
+}
+function dots(){
+  const d = el("div","dots"); d.setAttribute("aria-hidden","true");
+  STEPS.forEach((s,i)=>{
+    if(s.t==="intro"||s.t==="outro") return;
+    d.appendChild(el("span","dot"+(s.t==="audio"?" a":"")+(i===pos?" on":"")));
+  });
+  return d;
+}
+function nav(){
+  const n = el("div","nav");
+  const back = el("button","btn ghost","← Артқа"); back.type="button";
+  back.disabled = pos<=1;
+  back.addEventListener("click",()=>go(pos-1));
+  const last = pos === STEPS.length-2;
+  const next = el("button","btn"+(last?" coral":""), last ? "Аяқтау" : "Келесі →"); next.type="button";
+  next.addEventListener("click",()=>go(pos+1));
+  n.appendChild(back); n.appendChild(next);
+  return n;
+}
+function render(){
+  app.textContent = "";
+  const s = STEPS[pos];
+  if(s.t==="intro"){
+    const h = el("h1"); h.appendChild(document.createTextNode("DARYN ")); h.appendChild(el("span",null,"CUP"));
+    app.appendChild(h);
+    app.appendChild(el("div","badge","КИНО · МУЗЫКА"));
+    app.appendChild(el("p","title","Фильмді тап, әнді ата!"));
+    app.appendChild(el("p","text", VIDEOS.length+" видео үзінді мен "+AUDIOS.length+" ән үзіндісі болады. Әр үзіндіні көріп, жауабыңды ойла, содан кейін «Жауабын көрсету» батырмасын бас."));
+    const b = el("button","btn","Бастау"); b.type="button";
+    b.style.alignSelf="flex-start"; b.addEventListener("click",()=>go(1));
+    app.appendChild(b);
+  } else if(s.t==="outro"){
+    app.appendChild(el("p","title","Квиз аяқталды!"));
+    app.appendChild(el("p","text","Рақмет қатысқандарға! Ең дарынды кім екені енді белгілі."));
+    const n = el("div","nav");
+    const back = el("button","btn ghost","← Соңғы сұраққа"); back.type="button";
+    back.addEventListener("click",()=>go(pos-1));
+    const again = el("button","btn","Басынан бастау"); again.type="button";
+    again.addEventListener("click",()=>go(0));
+    n.appendChild(back); n.appendChild(again); app.appendChild(n);
+  } else {
+    const isA = s.t==="audio";
+    app.appendChild(el("div","badge"+(isA?" audio":""), (isA?"ӘНДІ АТА · ":"ФИЛЬМДІ ТАП · ")+(s.i+1)+" / "+(isA?AUDIOS.length:VIDEOS.length)));
+    app.appendChild(dots());
+    app.appendChild(media(s));
+    const reveal = el("div","reveal");
+    const ans = el("div","ans hidden",s.item.answer);
+    const show = el("button","btn coral","Жауабын көрсету"); show.type="button";
+    show.addEventListener("click",()=>{ans.classList.remove("hidden");show.classList.add("hidden")});
+    reveal.appendChild(show); reveal.appendChild(ans);
+    app.appendChild(reveal);
+    app.appendChild(nav());
+  }
+  window.scrollTo(0,0);
+}
+function go(p){
+  pos = Math.max(0, Math.min(STEPS.length-1, p));
+  render();
+}
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight" && pos>0 && pos<STEPS.length-1) go(pos+1);
+  if(e.key==="ArrowLeft" && pos>1) go(pos-1);
+});
+render();
+</script>
+</body>
+</html>
